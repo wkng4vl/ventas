@@ -34,3 +34,33 @@ jobs:
       with:
         name: 'ventas-build'
         path: publish/
+  deployHeroku:
+    name: Deploy Heroku
+    needs: [build-artifact]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: 'ventas-build'
+
+    - name: login
+      uses: actions/heroku@master
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      with:
+        args: container:login
+
+    - name: herokuPush
+      uses: actions/heroku@master
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      with:
+        args: container:push -a vl-ventas web
+
+    - name: herokuRelease
+      uses: actions/heroku@master
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      with:
+        args: container:release -a vl-ventas web
