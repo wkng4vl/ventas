@@ -20,7 +20,9 @@ namespace Sales.Domain.ValueObjects.Orders
         public enum OrderTypeValue
         {
             Subscription,
-            Sales
+            RenewSubscription,
+            Sales,
+            Extra
         }
         public OrderTypeValue Type { get; set; }
         protected override IEnumerable<object> GetAtomicValues()

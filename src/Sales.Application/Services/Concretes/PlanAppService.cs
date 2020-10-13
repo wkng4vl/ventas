@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Sales.Application.Dtos.Plans;
 using Sales.Application.Extensions;
 using Sales.Application.Services.Abstracts;
+using Sales.Domain.Entities.Orders;
 using Sales.Domain.Entities.Plans;
 using Sales.Domain.Repositories;
 using Sales.Domain.Services.Abstracts;
@@ -24,13 +25,19 @@ namespace Sales.Application.Services.Concretes
         private readonly IRepository<Plan, Guid> _planRepository;
         private readonly IPlanDomainService _planDomainService;
         private readonly IPlanPriceRepository _planPriceRepository;
+        private readonly IOrderRepository _orderRepository;
         private readonly IObjectMapper _mapper;
 
-        public PlanAppService(IRepository<Plan, Guid> planRepository, IPlanDomainService planDomainService, IPlanPriceRepository planPriceRepository, IObjectMapper mapper)
+        public PlanAppService(IRepository<Plan, Guid> planRepository,
+                              IPlanDomainService planDomainService,
+                              IPlanPriceRepository planPriceRepository,
+                              IOrderRepository orderRepository,
+                              IObjectMapper mapper)
         {
             _planRepository = planRepository ?? throw new ArgumentNullException(nameof(planRepository));
             _planDomainService = planDomainService ?? throw new ArgumentNullException(nameof(planDomainService));
             _planPriceRepository = planPriceRepository ?? throw new ArgumentNullException(nameof(planPriceRepository));
+            _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
@@ -60,6 +67,20 @@ namespace Sales.Application.Services.Concretes
             return _mapper.Map<PlanPriceDto>(planPrice);
         }
 
+        [HttpPut]
+        public PlanPriceDto UpdatePrice(CreatePlanPriceInput input)
+        {
+            PlanPrice planPrice = _mapper.Map<PlanPrice>(input);
+
+            PlanPrice currentPlanPrice = _planPriceRepository.GetByPlan(input.PlanId, planPrice.Currency);
+
+            planPrice = _mapper.Map<CreatePlanPriceInput, PlanPrice>(input, currentPlanPrice);
+
+            _planPriceRepository.Update(planPrice);
+
+            return _mapper.Map<PlanPriceDto>(planPrice);
+        }
+
         public IEnumerable<PlanPriceDto> Get(Guid id)
         {
             Plan plan = _planRepository.GetAllIncluding(x => x.PlanPrices).Single(x => x.Id == id);
@@ -82,7 +103,9 @@ namespace Sales.Application.Services.Concretes
 
         public PlanPriceDto GetByOrder(Guid orderId)
         {
-            PlanPrice planprice = _planPriceRepository.GetByOrder(orderId);
+            Order order = _orderRepository.Get(orderId);
+
+            PlanPrice planprice = _planPriceRepository.GetByOrder(order);
 
             PlanPriceDto planDto = _mapper.Map<PlanPriceDto>(planprice);
 
