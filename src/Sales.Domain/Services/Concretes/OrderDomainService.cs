@@ -25,8 +25,20 @@ namespace Sales.Domain.Services.Concretes
                 Status = new OrderStatus(OrderStatus.OrderStatusValue.Created),
                 TotalAmount = planPrice.Price,
                 UserId = userId,
-                Type = new OrderType(OrderType.OrderTypeValue.Subscription),
-                IsDeleted = false
+                Type = new OrderType(OrderType.OrderTypeValue.Subscription)
+            };
+        }
+
+        public Order CreateOrderForRenewSubscription(PlanPrice planPrice, Guid userId, DateTime creationDate)
+        {
+            return new Order
+            {
+                CreationTime = creationDate,
+                Currency = planPrice.Currency,
+                Status = new OrderStatus(OrderStatus.OrderStatusValue.Created),
+                TotalAmount = planPrice.Price,
+                UserId = userId,
+                Type = new OrderType(OrderType.OrderTypeValue.RenewSubscription)
             };
         }
 
@@ -38,6 +50,11 @@ namespace Sales.Domain.Services.Concretes
         public void CancelOrder(Order order)
         {
             order.Status.Status = OrderStatus.OrderStatusValue.Canceled;
+        }
+
+        public void ExpireOrder(Order order)
+        {
+            order.Status.Status = OrderStatus.OrderStatusValue.Expirated;
         }
     }
 }
