@@ -45,21 +45,21 @@ jobs:
         name: 'ventas-build'
 
     - name: login
-      uses: actions/heroku@master
+      uses: wkng4vl/heroku@main
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       with:
         args: container:login
 
     - name: herokuPush
-      uses: actions/heroku@master
+      uses: wkng4vl/heroku@main
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       with:
         args: container:push -a vl-ventas-test web
 
     - name: herokuRelease
-      uses: actions/heroku@master
+      uses: wkng4vl/heroku@main
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       with:
